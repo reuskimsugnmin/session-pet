@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>세션 펫 웹 체험판</title>
+<meta name="description" content="세션 펫을 웹에서 만져 보는 체험판이에요. 가상 세션 3개를 옮겨 다니며 펫과 패널이 어떻게 따라오는지 보세요." />
+<link rel="icon" type="image/png" href="assets/pet-idle.png" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<style>
+/* 색은 제품 토큰 app/assets/tokens/tokens.json v0.3.0 값만 쓴다 */
+:root{
+  --ink:#2B2B33; --sub:#6E6E73; --tertiary:#707070;
+  --surface:#ffffff; --hover:rgba(0,0,0,.04); --sent:rgba(0,0,0,.03);
+  --border:rgba(0,0,0,.12); --border-subtle:rgba(0,0,0,.06);
+  --working:#3B82F6; --done:#34C759; --attention:#FF9500; --sleep:#A1A1AA; --idle:#8E8E93;
+  --btn-primary:#3E76D6; --btn-primary-hover:#2F5FB8; --btn-primary-pressed:#244C9E;
+  --btn-disabled-bg:rgba(0,0,0,.08); --btn-disabled-text:#C7C7CC;
+  --ai-bg:#EEEDFB; --ai-text:#5B57B8; --memo-bg:#E3F3F2; --memo-text:#256863;
+  --page:#F7F7F8; --terminal:#141414;
+  --font:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--page);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;line-height:1.6}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+
+.topbar{background:var(--ink);color:#fff;font-size:13.5px;padding:9px 0}
+.topbar .wrap{text-align:center}
+
+header{padding:26px 0 4px}
+h1{font-size:clamp(20px,3vw,26px);font-weight:800;letter-spacing:-.015em;margin:0 0 6px}
+.lede{font-size:14.5px;color:var(--sub);margin:0}
+.lede b{color:var(--ink);font-weight:700}
+
+.stage{margin:20px 0 10px;display:grid;grid-template-columns:minmax(0,1fr) 396px;gap:18px;align-items:start}
+@media(max-width:900px){.stage{grid-template-columns:1fr}}
+
+.card{background:var(--surface);border:1px solid var(--border-subtle);border-radius:20px;overflow:hidden}
+.card-h{padding:13px 17px;border-bottom:1px solid var(--border-subtle);font-weight:700;font-size:13.5px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.card-h .hint{font-weight:500;color:var(--sub);font-size:12.5px}
+
+.tabs{display:flex;gap:8px;padding:12px 13px;flex-wrap:wrap}
+.tab{flex:1 1 0;min-width:148px;text-align:left;cursor:pointer;font-family:inherit;font-size:13px;
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 11px;
+  display:flex;gap:9px;align-items:center;transition:background .14s,border-color .14s}
+.tab:hover{background:var(--hover)}
+.tab[aria-selected="true"]{border-color:var(--ink);background:var(--hover)}
+.tab:focus-visible{outline:3px solid var(--working);outline-offset:2px}
+.tab .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.tab .meta{min-width:0}
+.tab .proj{font-weight:700;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tab .st{color:var(--sub);font-size:11.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.term{background:var(--terminal);padding:18px;min-height:288px;display:flex;flex-direction:column}
+.term pre{margin:0;color:#D6D6D6;font-family:var(--mono);font-size:12.5px;line-height:1.85;white-space:pre-wrap;word-break:break-word}
+.term .prompt-line{margin-top:12px;display:flex;gap:7px;align-items:baseline;font-family:var(--mono);font-size:12.5px;color:#D6D6D6}
+.term .prompt-line .chev{color:#6E6E73;flex:none}
+.typed{color:#fff;word-break:break-word}
+.caret{display:inline-block;width:7px;height:15px;background:#fff;vertical-align:-2px;animation:blink 1.1s steps(1,end) infinite;flex:none}
+@keyframes blink{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.caret{animation:none}}
+
+.petdock{margin-top:auto;padding-top:16px;display:flex;gap:10px;align-items:flex-end}
+.pet{width:94px;height:100px;flex:none}
+.pet img{width:100%;height:100%;object-fit:contain;display:block}
+.bubble{background:var(--surface);border-radius:16px;padding:11px 13px;font-size:13px;position:relative;max-width:252px;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.bubble::after{content:"";position:absolute;left:-6px;bottom:15px;width:12px;height:12px;background:var(--surface);transform:rotate(45deg)}
+.bubble .txt{position:relative;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+.panel{padding:13px;display:flex;flex-direction:column;gap:10px}
+.sec{border:1px solid var(--border-subtle);border-radius:16px;padding:12px 13px}
+.sec h3{margin:0 0 7px;font-size:12px;font-weight:700;color:var(--sub)}
+.goal{font-size:14.5px;font-weight:700;line-height:1.45}
+.cur{font-size:13.5px}
+.eyebrow{font-size:11.5px;color:var(--tertiary);margin-bottom:3px}
+
+.q{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.q li{display:flex;gap:8px;align-items:center;border:1px solid var(--border-subtle);border-radius:9px;padding:8px 9px;font-size:13px;background:var(--surface)}
+.q li.dragging{opacity:.45}
+.q li.over{border-color:var(--btn-primary);border-style:dashed}
+.q li.sent{background:var(--sent);opacity:.62}
+.q li .t{flex:1;min-width:0}
+.badge{font-size:10.5px;font-weight:700;border-radius:6px;padding:2px 6px;flex:none;white-space:nowrap}
+.badge.ai{background:var(--ai-bg);color:var(--ai-text)}
+.badge.me{background:var(--memo-bg);color:var(--memo-text)}
+.grip{color:var(--tertiary);font-size:13px;cursor:grab;flex:none;user-select:none}
+.iconbtn{border:0;background:transparent;cursor:pointer;font-size:13px;padding:3px 5px;border-radius:6px;color:var(--sub);font-family:inherit;flex:none}
+.iconbtn:hover{background:var(--hover);color:var(--ink)}
+.iconbtn:focus-visible{outline:2px solid var(--working);outline-offset:1px}
+
+.addrow{display:flex;gap:6px;margin-top:8px}
+.addrow input{flex:1;min-width:0;border:1px solid var(--border);border-radius:12px;padding:9px 11px;font-family:inherit;font-size:13px;background:var(--surface);color:var(--ink)}
+.addrow input:focus{outline:2px solid var(--working);outline-offset:-1px;border-color:transparent}
+.btn{border:0;border-radius:12px;padding:9px 13px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:var(--btn-primary);color:#fff;flex:none}
+.btn:hover{background:var(--btn-primary-hover)}
+.btn:active{background:var(--btn-primary-pressed)}
+.btn:disabled{background:var(--btn-disabled-bg);color:var(--btn-disabled-text);cursor:default}
+.btn:focus-visible{outline:3px solid var(--working);outline-offset:2px}
+.btn.block{width:100%;padding:11px;font-size:13.5px}
+.empty{font-size:12.5px;color:var(--tertiary);padding:3px 1px;margin:0}
+
+.drawer summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--sub);list-style:none}
+.drawer summary::-webkit-details-marker{display:none}
+.drawer summary::before{content:"▸ ";display:inline-block;transition:transform .15s}
+.drawer[open] summary::before{transform:rotate(90deg)}
+.drawer ul{list-style:none;margin:7px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.drawer li{font-size:12.5px;color:var(--sub);display:flex;gap:6px}
+
+.tips{margin:4px 2px 0;font-size:12.5px;color:var(--tertiary)}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px);background:var(--ink);color:#fff;padding:11px 16px;border-radius:12px;font-size:13.5px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50;max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+footer{margin:26px 0 40px;padding-top:16px;border-top:1px solid var(--border);font-size:13px;color:var(--sub);display:flex;gap:16px;flex-wrap:wrap}
+footer a{color:var(--sub)}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap">세션 펫 웹 체험판이에요. 실제 제품은 macOS 앱이고, 여기서는 가상 세션으로 동작만 만져 볼 수 있어요.</div></div>
+
+<div class="wrap">
+<header>
+  <h1>세션을 옮겨 보세요</h1>
+  <p class="lede">세션 3개를 켜 둔 상태예요. 탭을 누르면 <b>펫과 패널이 그 세션을 따라와요.</b></p>
+</header>
+
+<div class="stage">
+  <section class="card" aria-labelledby="stage-h">
+    <div class="card-h">
+      <span id="stage-h">지금 보고 있는 세션</span>
+      <span class="hint">탭을 눌러 옮겨 보세요</span>
+    </div>
+    <div class="tabs" role="tablist" aria-label="세션 목록" id="tabs"></div>
+    <div class="term">
+      <pre id="termText" aria-live="polite"></pre>
+      <div class="prompt-line">
+        <span class="chev">›</span><span class="typed" id="typed"></span><span class="caret" aria-hidden="true"></span>
+      </div>
+      <div class="petdock">
+        <div class="pet"><img id="petImg" alt="" /></div>
+        <div class="bubble"><div class="txt" id="bubble"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="panel-h">
+    <div class="card-h"><span id="panel-h">펫을 클릭하면 열리는 패널</span></div>
+    <div class="panel">
+      <div class="sec">
+        <h3>목표</h3>
+        <div class="goal" id="goal"></div>
+      </div>
+      <div class="sec">
+        <h3>할 일</h3>
+        <div class="eyebrow" id="curLabel">지금</div>
+        <div class="cur" id="cur"></div>
+      </div>
+      <div class="sec">
+        <h3>📝 다음 할 일</h3>
+        <ul class="q" id="queue"></ul>
+        <p class="empty" id="queueEmpty" hidden>다음 할 일이 없어요</p>
+        <div class="addrow">
+          <label class="sr" for="memo">할 일 추가</label>
+          <input id="memo" placeholder="떠오른 걸 적어 두세요" maxlength="120" />
+          <button class="btn" id="addBtn">추가</button>
+        </div>
+        <button class="btn block" id="injectBtn" style="margin-top:8px">다음 작업을 프롬프트에 입력</button>
+      </div>
+      <details class="drawer sec">
+        <summary>서랍</summary>
+        <ul id="drawer"></ul>
+      </details>
+    </div>
+  </section>
+</div>
+
+<p class="tips">대기열 항목은 드래그해서 순서를 바꿀 수 있어요. ↵ 를 누르면 왼쪽 입력줄에 채워지고, Enter 는 직접 누르는 자리예요.</p>
+
+<footer>
+  <a href="https://github.com/reuskimsugnmin/session-pet/releases">macOS 앱 내려받기</a>
+  <a href="https://github.com/reuskimsugnmin/session-pet">GitHub</a>
+  <span>세션 펫은 가칭이에요</span>
+</footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// 시나리오 — landing/fixtures/snapshots.json 의 StateSnapshot 3종(PRD §2.3 "하루의 한 장면")을
+// 그대로 옮겼다. 값을 새로 지어내지 않는다: 제품이 실제로 만들어 내는 모양을 보여주는 것이 목적이다.
+const SESSIONS = [
+  {
+    id:'a', project:'svcp-app', branch:'feat/push', petState:'done',
+    terminal:'› 앱 푸시 기능 마무리하고 스토어 제출까지\n\n  ⏺ 푸시 토큰 갱신 로직을 정리하고 테스트를 돌렸어요\n    47개 파일 변경, 테스트 212건 통과\n  ⏺ PR #212 머지 완료\n    후속: SVCP-150 실기기 확인 필요',
+    summary:{goal:'앱 푸시 기능 마무리하고 스토어 제출까지',current:'머지 완료, 후속 티켓 정리 중',done:['푸시 토큰 갱신 로직','테스트 212건 통과','PR 머지'],held:['배지 카운트 정책은 기획 확인 뒤']},
+    queue:[{id:'a1',text:'SVCP-150 실기기 확인',source:'ai',status:'pending'},{id:'a2',text:'릴리스 노트 작성',source:'ai',status:'pending'}],
+    attentionText:null,
+  },
+  {
+    id:'b', project:'resume-automation', branch:'main', petState:'working',
+    terminal:'› 이력서 자동화 파이프라인의 파서를 리팩터링해 줘\n\n  ⏺ 규칙 파일을 분리하고 있어요\n    파싱 규칙 12건 정리 중 (4m 12s)\n  ⏺ Working…',
+    summary:{goal:'이력서 자동화 파이프라인의 파서 리팩터링',current:'이력서 파서 리팩터링, 파싱 규칙 12건 정리 중',done:['규칙 파일 분리'],held:[]},
+    queue:[{id:'b1',text:'파싱 규칙 테스트 추가',source:'ai',status:'pending'},{id:'b2',text:'끝나면 README 도 갱신',source:'me',status:'pending'}],
+    attentionText:null,
+  },
+  {
+    id:'c', project:'new-project-planning', branch:'main', petState:'attention',
+    terminal:'› 새 프로젝트 기획 초안 잡아 줘\n\n  ⏺ 문제 정의를 마쳤어요. 경쟁사 비교로 넘어갑니다\n  ❓ 경쟁사 비교는 표로 만들까요, 불릿으로 만들까요?',
+    summary:{goal:'새 프로젝트 기획 초안',current:'경쟁사 비교 정리 중',done:['문제 정의'],held:[]},
+    queue:[{id:'c1',text:'가격표 초안',source:'ai',status:'pending'}],
+    attentionText:'경쟁사 비교는 표로 만들까요, 불릿으로 만들까요?',
+  },
+];
+
+const STATUS_COLOR = {working:'var(--working)',done:'var(--done)',attention:'var(--attention)',idle:'var(--idle)',sleep:'var(--sleep)'};
+const STATUS_LABEL = {working:'작업 중',done:'완료',attention:'답을 기다려요',idle:'대기',sleep:'잠듦'};
+
+// app/src/renderer/strings.ts 의 bubbleText() 분기를 그대로 옮겼다 — 문구를 새로 짓지 않는다.
+function bubbleText(s){
+  const next = s.queue.find(q => q.status === 'pending');
+  switch(s.petState){
+    case 'attention': return s.attentionText ? `❓ ${s.attentionText}` : '❓ 입력을 기다리고 있어요';
+    case 'working':   return s.summary.current ? `🔧 ${s.summary.current}` : '🔧 작업 중…';
+    case 'done':      return next ? `✅ 끝! 다음: ${next.text}` : '✅ 끝! 다음 할 일을 적어 주세요';
+    default:          return s.summary.current ?? '무엇을 하고 있었는지 아직 몰라요';
+  }
+}
+function currentLabel(st){ return st === 'done' ? '마지막으로 한 일' : '지금'; }
+
+let activeId = SESSIONS[0].id;
+const $ = id => document.getElementById(id);
+const active = () => SESSIONS.find(s => s.id === activeId);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function renderTabs(){
+  const box = $('tabs');
+  box.innerHTML = '';
+  for(const s of SESSIONS){
+    const b = document.createElement('button');
+    b.className = 'tab'; b.type = 'button';
+    b.setAttribute('role','tab');
+    b.setAttribute('aria-selected', String(s.id === activeId));
+    b.innerHTML = `<span class="dot" style="background:${STATUS_COLOR[s.petState]}"></span>
+      <span class="meta"><span class="proj">${esc(s.project)}</span>
+      <span class="st">${esc(s.branch)} · ${STATUS_LABEL[s.petState]}</span></span>`;
+    b.onclick = () => { activeId = s.id; renderAll(); toast(`${s.project} 세션으로 옮겼어요`); };
+    box.appendChild(b);
+  }
+}
+
+function renderStage(){
+  const s = active();
+  $('termText').textContent = s.terminal;
+  $('petImg').src = `assets/pet-${s.petState}.png`;
+  $('petImg').alt = `펫이 ${STATUS_LABEL[s.petState]} 상태예요`;
+  $('bubble').textContent = bubbleText(s);
+}
+
+function renderPanel(){
+  const s = active();
+  $('goal').textContent = s.summary.goal;
+  $('curLabel').textContent = currentLabel(s.petState);
+  $('cur').textContent = s.summary.current;
+
+  const ul = $('queue'); ul.innerHTML = '';
+  for(const q of s.queue){
+    const li = document.createElement('li');
+    li.draggable = true; li.dataset.id = q.id;
+    if(q.status === 'sent') li.classList.add('sent');
+    li.innerHTML = `<span class="grip" aria-hidden="true">⠿</span>
+      <span class="badge ${q.source === 'ai' ? 'ai' : 'me'}">${q.source === 'ai' ? 'AI' : '내 메모'}</span>
+      <span class="t">${esc(q.text)}</span>
+      <button class="iconbtn" title="프롬프트에 입력" aria-label="${esc(q.text)} 프롬프트에 입력">↵</button>
+      <button class="iconbtn" title="삭제" aria-label="${esc(q.text)} 삭제">🗑</button>`;
+    const [injectBtn, delBtn] = li.querySelectorAll('.iconbtn');
+    injectBtn.onclick = () => injectItem(q.id);
+    delBtn.onclick = () => { s.queue = s.queue.filter(x => x.id !== q.id); renderAll(); toast('지웠어요'); };
+    wireDrag(li);
+    ul.appendChild(li);
+  }
+  $('queueEmpty').hidden = s.queue.length > 0;
+  $('injectBtn').disabled = !s.queue.some(q => q.status === 'pending');
+
+  const d = $('drawer'); d.innerHTML = '';
+  const rows = [...s.summary.done.map(t => ['완료', t]), ...s.summary.held.map(t => ['보류', t])];
+  if(rows.length === 0){
+    d.innerHTML = '<li>완료·보류 항목이 없어요</li>';
+  } else {
+    for(const [k,t] of rows){
+      const li = document.createElement('li');
+      li.innerHTML = `<span style="color:var(--tertiary);flex:none">${k}</span><span>${esc(t)}</span>`;
+      d.appendChild(li);
+    }
+  }
+}
+
+// 주입 — 제품과 같은 계약: 입력창을 채우기만 하고 Enter 는 보내지 않는다 (PRD §6)
+function injectItem(id){
+  const s = active();
+  const item = s.queue.find(q => q.id === id);
+  if(!item) return;
+  $('typed').textContent = item.text;
+  item.status = 'sent';
+  renderAll();
+  toast('입력창에 채웠어요. Enter 는 직접 누르세요');
+}
+
+$('injectBtn').onclick = () => {
+  const next = active().queue.find(q => q.status === 'pending');
+  if(next) injectItem(next.id);
+};
+$('addBtn').onclick = addMemo;
+$('memo').addEventListener('keydown', e => { if(e.key === 'Enter') addMemo(); });
+function addMemo(){
+  const input = $('memo');
+  const text = input.value.trim();
+  if(!text) return;
+  active().queue.push({id:'m'+Date.now(), text, source:'me', status:'pending'});
+  input.value = '';
+  renderAll();
+  toast('대기열에 더했어요');
+}
+
+let dragId = null;
+function wireDrag(li){
+  li.addEventListener('dragstart', e => {
+    dragId = li.dataset.id; li.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try{ e.dataTransfer.setData('text/plain', dragId); }catch(_){}
+  });
+  li.addEventListener('dragend', () => { dragId = null; li.classList.remove('dragging'); document.querySelectorAll('.q li').forEach(x => x.classList.remove('over')); });
+  li.addEventListener('dragover', e => { e.preventDefault(); if(dragId && dragId !== li.dataset.id) li.classList.add('over'); });
+  li.addEventListener('dragleave', () => li.classList.remove('over'));
+  li.addEventListener('drop', e => {
+    e.preventDefault(); li.classList.remove('over');
+    const s = active();
+    const from = s.queue.findIndex(q => q.id === dragId);
+    const to = s.queue.findIndex(q => q.id === li.dataset.id);
+    if(from < 0 || to < 0 || from === to) return;
+    const [moved] = s.queue.splice(from, 1);
+    s.queue.splice(to, 0, moved);
+    renderAll();
+    toast('순서를 바꿨어요');
+  });
+}
+
+function renderAll(){ renderTabs(); renderStage(); renderPanel(); }
+renderAll();
+</script>
+</body>
+</html>

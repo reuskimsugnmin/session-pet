@@ -68,14 +68,6 @@
   .solve { position: relative; background: var(--solve-bg); border-left: 4px solid var(--solve-bar); border-radius: 0 12px 12px 0; padding: 18px 20px 18px 22px; font-size: 16.5px; line-height: 1.7; }
   .solve strong { display: block; font-size: 14px; color: var(--solve-bar); margin-bottom: 6px; }
   .solve p { margin: 0; }
-  .row .stage { padding: 14px; }
-  .row .pane { min-height: 190px; }
-  .stage.trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 14px 10px; }
-  .mini { position: relative; background: #0f0f10; border-radius: 8px; padding: 12px 8px 10px; min-height: 150px; }
-  .mini .bar { font-family: var(--mono); font-size: 10px; color: #8e8e93; display: flex; align-items: center; gap: 6px; }
-  .mini .bar i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
-  .mini img { width: 54px; position: absolute; right: 8px; bottom: 8px; filter: drop-shadow(0 6px 10px rgba(0,0,0,.45)); }
-  .mini .say { position: absolute; left: 8px; bottom: 12px; width: 84px; background: var(--panel); border-radius: 8px; padding: 6px 8px; font-size: 10.5px; line-height: 1.35; color: var(--ink); }
 
   /* 무료 CTA */
   .free h2 { margin-bottom: 14px; max-width: 26em; }
@@ -88,14 +80,7 @@
     .hero, .row { grid-template-columns: 1fr; }
     .row .shot { order: 2; } /* 모바일: 제목·설명이 먼저, 영상이 뒤 */
     h1 { font-size: 30px; } h2 { font-size: 26px; }
-    .pane { min-height: 200px; }
-    .bubble { width: 200px; right: 96px; }
-    .pet { width: 72px; right: 16px; }
-    .stage.trio { grid-template-columns: 1fr; }
-    .mini { min-height: 120px; }
   }
-  @media (prefers-reduced-motion: no-preference) { .pet { animation: bob 3.2s ease-in-out infinite; } }
-  @keyframes bob { 50% { transform: translateY(-4px); } }
 </style>
 </head>
 <body data-min-macos="13.0">
@@ -174,7 +159,7 @@
 </main>
 
 <footer class="wrap">
-  <a href="install.md">설치 안내</a><a href="mailto:smkim931206@gmail.com">피드백 보내기</a><a href="THIRD-PARTY-NOTICES.md">서드파티 고지</a><a href="https://github.com/reuskimsugnmin/session-pet/releases">GitHub Releases</a>
+  <a href="https://github.com/reuskimsugnmin/session-pet/blob/main/install.md">설치 안내</a><a href="mailto:smkim931206@gmail.com">피드백 보내기</a><a href="https://github.com/reuskimsugnmin/session-pet/blob/main/THIRD-PARTY-NOTICES.md">서드파티 고지</a><a href="https://github.com/reuskimsugnmin/session-pet/releases">GitHub Releases</a>
   <div style="margin-top:10px">세션 펫은 가칭이에요.</div>
 </footer>
 </body>

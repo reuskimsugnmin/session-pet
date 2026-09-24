@@ -35,11 +35,18 @@
 
 ## 2. 앱을 열기
 
-1. DMG 파일을 받아 엽니다.
+랜딩페이지 <https://reuskimsugnmin.github.io/session-pet/> 의 다운로드 버튼이 아래와 같은 파일을 가리킵니다.
+설치 전에 웹에서 둘러보고 싶으면 같은 페이지의 「데모 체험」 버튼을 누르세요.
+
+1. **[최신 릴리스](https://github.com/reuskimsugnmin/session-pet/releases/latest)** 에서 `Session-Pet-arm64.dmg` 를 받아 엽니다
+   (Apple Silicon 전용). 바로 받는 링크: <https://github.com/reuskimsugnmin/session-pet/releases/latest/download/Session-Pet-arm64.dmg>
 2. 앱을 `Applications` 폴더로 끌어다 놓습니다.
 3. 앱을 실행합니다.
 
-**배포되는 앱은 Developer ID 로 서명하고 Apple 공증(노타라이즈)을 받습니다** (2026-09-18 부터 — `app/electron-builder.config.cjs`).
+받은 파일이 온전한지 확인하려면 릴리스의 `SHA256SUMS.txt` 와 대조합니다: `shasum -a 256 ~/Downloads/Session-Pet-arm64.dmg`.
+
+**배포되는 앱은 Developer ID 로 서명하고 Apple 공증(노타라이즈)을 받습니다** (2026-09-18 부터 — `app/electron-builder.config.cjs`
+와 `app/scripts/release.ts`. DMG 컨테이너도 따로 서명·공증한다 — 2026-09-19 정정).
 공증된 앱은 Gatekeeper 경고 없이 열려야 하지만, **다른 기계에서 실제로 열어 확인하기 전까지는 미확인**입니다
 (`docs/manual-checklist.md` K11).
 
@@ -122,7 +129,8 @@ Dock 이나 Launchpad 에서 띄운 앱은 macOS 가 아주 좁은 PATH(`/usr/bi
   (`config.json`), 로그(`logs/pet.log`, 5MB 씩 2개 순환).
 - **로그와 "진단 정보 복사"에는 대화 내용이 담기지 않습니다.** 프롬프트·응답·요약·메모는 글자 수로만
   기록됩니다. 그대로 이슈나 메시지에 붙여도 안전합니다.
-- **자동 종료**: 추적할 세션이 0개인 상태가 이어지면(기본 60초) 펫이 스스로 꺼집니다. 계속 띄워
+- **자동 종료**: 추적할 세션이 0개인 상태가 이어지면(기본 60초) 펫이 스스로 꺼집니다. 설정에서 막힌 것을
+  안내하는 동안에는 꺼지지 않습니다. 계속 띄워
   두고 싶으면 `~/.session-pet/config.json` 에 `{ "version": 1, "autoQuitMs": 0 }` 를 넣으세요.
 
 ---

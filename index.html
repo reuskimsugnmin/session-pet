@@ -69,6 +69,14 @@
   .solve strong { display: block; font-size: 14px; color: var(--solve-bar); margin-bottom: 6px; }
   .solve p { margin: 0; }
 
+  /* 환경별 능력표 — 정본은 설치 문서(install.md). 여기는 요약판 (오너 결정 2026-09-26 P3) */
+  .caps { width: 100%; border-collapse: collapse; font-size: 15.5px; background: #fff; border-radius: 12px; overflow: hidden; }
+  .caps th, .caps td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--rule); }
+  .caps th { font-size: 14px; color: var(--ink-2); font-weight: 600; background: rgba(0,0,0,.02); }
+  .caps tr:last-child td { border-bottom: 0; }
+  .caps-note { font-size: 14px; color: var(--ink-3); margin: 14px 0 0; }
+  .caps-wrap { overflow-x: auto; }
+
   /* 무료 CTA */
   .free h2 { margin-bottom: 14px; max-width: 26em; }
   .free p.sub { font-size: 17px; color: var(--ink-2); margin: 0 0 30px; max-width: 36em; }
@@ -107,6 +115,9 @@
           <span class="chip"><i class="iterm"></i>iTerm2</span>
           <span class="chip"><i class="tmux"></i>tmux</span>
           <span class="chip"><i class="cmux"></i>cmux</span>
+          <span class="chip"><i></i>Terminal</span>
+          <span class="chip"><i></i>Cursor · VS Code</span>
+          <span class="chip"><i class="claude"></i>Claude 앱</span>
         </div>
       </div>
     </div>
@@ -148,6 +159,23 @@
       </div>
       <div class="shot bare"><video autoplay muted loop playsinline preload="metadata" poster="assets/states.png"><source src="assets/states.webm" type="video/webm" /><source src="assets/states.mp4" type="video/mp4" /></video></div>
     </div>
+  </section>
+
+  <section id="envs">
+    <h2>어디서 띄운 세션이든 따라가요</h2>
+    <div class="caps-wrap">
+      <table class="caps">
+        <thead><tr><th>환경</th><th>보고 있는 세션 따라가기</th><th>입력창 채우기</th></tr></thead>
+        <tbody>
+          <tr><td>Orca · iTerm2 · tmux · cmux</td><td>✅</td><td>✅</td></tr>
+          <tr><td>Terminal.app</td><td>✅</td><td>📋 클립보드 복사</td></tr>
+          <tr><td>Claude 앱</td><td>✅</td><td>📋 클립보드 복사</td></tr>
+          <tr><td>Cursor · VS Code 통합 터미널</td><td>🔸 가장 최근에 활동한 세션</td><td>📋 클립보드 복사</td></tr>
+          <tr><td>Codex 앱</td><td>🔸 직전에 보던 세션 유지</td><td>📋 클립보드 복사</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caps-note">세션 요약과 메모는 모든 환경에서 돼요. 📋 는 그 앱에 Enter 없이 글자만 넣는 길이 없어서 클립보드에 담아 드리는 거예요. 자세한 표는 설치 문서에 있어요.</p>
   </section>
 
   <section id="get" class="free">
